@@ -53,6 +53,10 @@ jobs:
         with:
           name: python-app
           path: .
+
+      - name: Test with pytest
+        run: |
+          pytest    
           
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
