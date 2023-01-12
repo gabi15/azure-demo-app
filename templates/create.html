@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} {{title}} {% endblock %}</h1>
+<div class="form-group create-form">
+    <form  method="post">
+        <label for="title">Title</label>
+        <br>
+        <input  class="form-control" type="text" name="title"
+               placeholder="Song title"
+               value="{{ request.form['title'] }}">
+        <br>
+
+        <label for="artist">Artist</label>
+        <br>
+        <input  class="form-control" type="text" name="artist"
+               placeholder="Artist"
+               value="{{ request.form['artist'] }}">
+        <br>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    </div>
+
+
+{% endblock %}

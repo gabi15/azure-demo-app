@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Picked Song {% endblock %}</h1>
+{% for song in songs %}
+<div class='song'>
+    <h3>{{ song['Name'] }}</h3>
+    <p>{{ song['Artist'] }}</p>
+    <div>
+        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_song', song_id=song['ID']) }}">Update</a>
+        </button>
+    </div>
+    <form action="{{ url_for('delete_song', song_id=song['ID']) }}" method="POST">
+        <input class="btn btn-danger" type="submit" value="Delete">
+    </form>
+</div>
+{% endfor %}
+{% endblock %}
