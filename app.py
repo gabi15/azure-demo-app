@@ -2,8 +2,11 @@ from flask import Flask, jsonify
 import pyodbc
 import textwrap
 import os
+import logging
+
 
 app = Flask(__name__)
+
 
 server = 'tcp:relativity-project-db-server.database.windows.net,1433'
 database = 'project-db'
@@ -28,16 +31,18 @@ connection_string = textwrap.dedent('''
     password=password
 ))
 
-
+logging.basicConfig(level=logging.INFO)
 @app.route('/')
 def hello_world():
-    test_env = os.environ["TEST"]
-    return test_env + " jest pyszny"
+    app.logger.info("Info log information")
+    return "Hello world"
 
 
 @app.route('/songs')
 def get_songs():
     results = []
+    app.logger.info("db user: ", username)
+    app.logger.info("db password: ", password)
     with pyodbc.connect(connection_string) as conn:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * from [dbo].[Song]")
