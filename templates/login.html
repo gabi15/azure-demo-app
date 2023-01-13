@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Welcome to Song App</h1>
+
+    <a class="login" href='{{ auth_url }}'>Sign In</a>
+
+    {% if config.get("B2C_RESET_PASSWORD_AUTHORITY") %}
+    <a href='{{_build_auth_code_flow(authority=config["B2C_RESET_PASSWORD_AUTHORITY"])["auth_uri"]}}'>Reset Password</a>
+    {% endif %}
+
+    <hr>
+    <footer style="text-align: right">Powered by MSAL Python {{ version }}</footer>
+{% endblock %}
+

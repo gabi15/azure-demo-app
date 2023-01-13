@@ -2,8 +2,9 @@
 
 {% block content %}
 <h1>{% block title %} Songs {% endblock %}</h1>
+
 {% for song in songs %}
-<div class='song'>
+<div class='song left-space'>
     <h3><a href="{{ url_for('get_song', song_id=song['ID']) }}"> {{ song['Name'] }}</a></h3>
     <p>{{ song['Artist'] }}</p>
 </div>
