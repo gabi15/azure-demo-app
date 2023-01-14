@@ -1,9 +1,6 @@
-import pyodbc
-import requests
 import pytest
-
 from unittest.mock import MagicMock
-from song_operations import add_song_to_db, get_songs_from_db, connection_string, get_song_by_id_from_db, \
+from song_operations import add_song_to_db, get_songs_from_db, get_song_by_id_from_db, \
     delete_song_by_id_from_db, update_song_by_id_to_db
 
 
@@ -61,13 +58,3 @@ def test_update_song_to_db():
     mock_cursor.commit.assert_called()
 
 
-def test_db_connection():
-    connection = pyodbc.connect(connection_string)
-    assert connection is not None
-
-
-def test_main_route():
-    session = requests.Session()
-    response = session.get("https://project-lesniak.azurewebsites.net/")
-    session.close()
-    assert "Sign In" in str(response.content)
