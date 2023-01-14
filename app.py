@@ -1,14 +1,10 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, session
-import pyodbc
-import textwrap
-import os
 import logging
 import app_config
 from flask_session import Session
 import msal
-import uuid
-import requests
 from werkzeug.middleware.proxy_fix import ProxyFix
+from song_operations import get_songs, add_song, get_song_by_id, delete_song_by_id, update_song_by_id
 
 
 app = Flask(__name__)
@@ -20,47 +16,12 @@ logging.basicConfig(level=logging.INFO)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 
-server = 'tcp:relativity-project-db-server.database.windows.net,1433'
-database = 'project-db'
-username = os.environ["DB_USER"]
-password = os.environ["DB_PASSWORD"]
-driver = '{ODBC Driver 18 for SQL Server}'
-
-connection_string = textwrap.dedent('''
-    Driver={driver};
-    Server={server};
-    Database={database};
-    Uid={username};
-    Pwd={password};
-    Encrypt=yes;
-    TrustServerCertificate=no;
-    Connection Timeout=30;
-    '''.format(
-    driver=driver,
-    server=server,
-    database=database,
-    username=username,
-    password=password
-))
-
-
 @app.route("/")
 def index():
     if not session.get("user"):
         return redirect(url_for("login"))
-    results = []
-    print(session)
-    with pyodbc.connect(connection_string) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * from [dbo].[Song]")
-            columns = [column[0] for column in cursor.description]
-            rows = cursor.fetchall()
-            print(rows)
-            for row in rows:
-                results.append(dict(zip(columns, row)))
-            print(results)
-
-    return render_template('index.html', user=session["user"], version=msal.__version__, songs=results)
+    songs = get_songs()
+    return render_template('index.html', user=session["user"], version=msal.__version__, songs=songs)
 
 
 @app.route("/login")
@@ -150,16 +111,7 @@ def create_song():
 def get_song(song_id):
     if not session.get("user"):
         return redirect(url_for("login"))
-    results = []
-    with pyodbc.connect(connection_string) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * from [dbo].[Song] song where song.id=?", song_id)
-            columns = [column[0] for column in cursor.description]
-            rows = cursor.fetchall()
-            print(rows)
-            for row in rows:
-                results.append(dict(zip(columns, row)))
-            print(results)
+    results = get_song_by_id(song_id)
 
     return render_template('song.html', songs=results)
 
@@ -168,11 +120,7 @@ def get_song(song_id):
 def delete_song(song_id):
     if not session.get("user"):
         return redirect(url_for("login"))
-    delete_statement = 'DELETE FROM [dbo].[Song] WHERE ID=?'
-    with pyodbc.connect(connection_string) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(delete_statement, song_id)
-            cursor.commit()
+    delete_song_by_id(song_id)
     return redirect(url_for('index'))
 
 
@@ -191,26 +139,6 @@ def update_song(song_id):
             update_song_by_id({"Name": title, "Artist": artist}, song_id)
             return redirect(url_for('index'))
     return render_template('create.html', title='Update a song')
-
-
-def add_song(song):
-    if not session.get("user"):
-        return redirect(url_for("login"))
-    insert_statement = 'INSERT INTO [dbo].[Song] (Name, Artist) VALUES (?, ?)'
-    with pyodbc.connect(connection_string) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(insert_statement, song['Name'], song['Artist'])
-            cursor.commit()
-
-
-def update_song_by_id(song, id):
-    if not session.get("user"):
-        return redirect(url_for("login"))
-    update_statement = 'UPDATE [dbo].[Song] SET Name=?, Artist=? WHERE ID=?'
-    with pyodbc.connect(connection_string) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(update_statement, song['Name'], song['Artist'], id)
-            cursor.commit()
 
 
 app.jinja_env.globals.update(_build_auth_code_flow=_build_auth_code_flow)  # Used in template
