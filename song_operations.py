@@ -4,8 +4,8 @@ import pyodbc
 
 server = 'tcp:relativity-project-db-server.database.windows.net,1433'
 database = 'project-db'
-username = os.environ["DB_USER"]
-password = os.environ["DB_PASSWORD"]
+username = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
 driver = '{ODBC Driver 18 for SQL Server}'
 
 connection_string = textwrap.dedent('''
